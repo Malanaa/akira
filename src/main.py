@@ -1,9 +1,16 @@
 import numpy as np
 import math
 import random
+import matplotlib.pyplot as plt
+import pandas as pd
+
+
 
 
 def activation_func(num) -> float:
+    '''
+    Sigmoid
+    '''
     return (1 / (1 + math.exp(num)))
 
 
@@ -81,7 +88,6 @@ class Network():
     
     def set_input_layer_size(self,n):
         self.layer_list[0] = Layer(n)
-        self.frame_update()
     
     def set_output_layer_size(self,n):
         self.layer_list[-1] = Layer(n)
@@ -132,10 +138,32 @@ class Akira():
 
 
 def main():
+
+    # Loading in the dala
+    df = pd.read_csv('dataset_digits/archive/train.csv')
+    # labels
+    label = df['label']
+    data = df.drop('label', axis=1)
+
+    # img i for example
+    i = 1
+    label_i = label.iloc[i]
+    data_i = data.iloc[i]
+    image_i = data.iloc[i].values.reshape(28,28)
+
+    # raw 1D vector that i need
+    raw_image_vector = data.iloc[i].values
+
+    # plt.imshow(image_i, cmap='gray')
+    # print(label_i)
+    # plt.show()
+
+    # set n-layered nueral network
     network = Network(4)
+
     # First set size of Input and Output Layer
-    network.set_input_layer_size(10)
-    network.set_output_layer_size(2)
+    network.set_input_layer_size(784)
+    network.set_output_layer_size(10)
 
     '''
     The order here matters, you must initialze the first and last layer first. this is because of how the functions are called 
@@ -143,7 +171,7 @@ def main():
     ( I could make it so that the last layer is done after but there is no point, if a usecase shows up ill change it)
     '''
     # then set size of hidden layers
-    network.set_hidden_layer_size(5)
+    network.set_hidden_layer_size(16)
 
     # Randomizing just to test
     network.randomize_weights()
@@ -157,6 +185,8 @@ def main():
 if __name__ == "__main__":
     main()
 
+# Find a way to save kernals(weights and biases for each neuron ) and then fetch them again 
+# Learn MatPlotLib to bueatifully display how akira thinks
 # Randomly Generate weights and biases
 # Cost Function (Study Cost Function) Since this takes in al weights
 # WE LOCAL MINIMUM to reduce cost function, local minimum functions, what happens to the activations, overshooting
