@@ -87,6 +87,7 @@ class Network():
         self.layer_list[-1] = Layer(n)
         self.frame_update()
     
+    # Also sets previous layers for every neuron
     def set_hidden_layer_size(self,n):
         for i in range(1,self.n_layered - 1):
             self.layer_list[i] = Layer(n)
@@ -96,8 +97,8 @@ class Network():
 
     def randomize_weights(self):
         for i in range(1,len(self.layer_list)):
-            for j in range(len(self.layer_list[i].vector)):
-                self.layer_list[i].vector[j].frame_update_for_nueron_weights()  
+            for j in range(len(self.layer_list[i].vector)): 
+                self.layer_list[i].vector[j].frame_update_for_nueron_weights() 
                 self.layer_list[i].vector[j].randomize_weights()
 
     def randomize_bias(self):
@@ -132,11 +133,23 @@ class Akira():
 
 def main():
     network = Network(4)
+    # First set size of Input and Output Layer
     network.set_input_layer_size(10)
     network.set_output_layer_size(2)
+
+    '''
+    The order here matters, you must initialze the first and last layer first. this is because of how the functions are called 
+    . set_hidden_layer_size() sizes up the weights list for all the hidden layers and the last layer. 
+    ( I could make it so that the last layer is done after but there is no point, if a usecase shows up ill change it)
+    '''
+    # then set size of hidden layers
     network.set_hidden_layer_size(5)
+
+    # Randomizing just to test
     network.randomize_weights()
     network.randomize_bias()
+
+    # debugging
     network.debug()
 
 
