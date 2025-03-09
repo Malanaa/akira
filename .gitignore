@@ -1,3 +1,4 @@
 venv/
 src/dataset_digits
 src/dataset_mnist
+.DS_Store
