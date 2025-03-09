@@ -88,6 +88,15 @@ class Network():
     
     def set_input_layer_size(self,n):
         self.layer_list[0] = Layer(n)
+
+    def set_input_layer_values(self, input_activations):
+        if(len(self.layer_list[0].vector) != len(input_activations)):
+            # add exception handling
+            # Doesnt work because input values size need to be equal to size of layer
+            return 
+        for i in range(len(input_activations)):
+            self.layer_list[0].vector[i].activation = input_activations[i]
+
     
     def set_output_layer_size(self,n):
         self.layer_list[-1] = Layer(n)
@@ -140,7 +149,7 @@ class Akira():
 def main():
 
     # Loading in the dala
-    df = pd.read_csv('dataset_digits/archive/train.csv')
+    df = pd.read_csv('dataset_digits/train.csv')
     # labels
     label = df['label']
     data = df.drop('label', axis=1)
@@ -164,6 +173,10 @@ def main():
     # First set size of Input and Output Layer
     network.set_input_layer_size(784)
     network.set_output_layer_size(10)
+    
+    # Setting values of the input layer
+    network.set_input_layer_values(raw_image_vector)
+
 
     '''
     The order here matters, you must initialze the first and last layer first. this is because of how the functions are called 
@@ -179,6 +192,8 @@ def main():
 
     # debugging
     network.debug()
+
+
 
 
 
