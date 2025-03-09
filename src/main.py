@@ -7,7 +7,7 @@ import pandas as pd
 
 
 
-def activation_func(num) -> float:
+def sigmoid_squish(num) -> float:
     '''
     Sigmoid
     '''
@@ -65,10 +65,11 @@ class Nueron:
 
     # Only for hideen layers
     def set_activation(self):
-        if not self.prev_layer:
+        if self.prev_layer:
             for i in range(len(self.prev_layer.vector)):
                 pre_bias = self.prev_layer.vector[i].activation * self.weights[i]
-            self.activation = activation_func(pre_bias + self.bias)
+            self.activation = sigmoid_squish(pre_bias + self.bias)
+
 
 
 class Network():
@@ -122,23 +123,37 @@ class Network():
                 self.layer_list[i].vector[j].randomize_bias()
 
 
+    def set_all_activation(self):
+        for i in range(1,len(self.layer_list)):
+            for j in range(len(self.layer_list[i].vector)):
+                self.layer_list[i].vector[j].set_activation()
+
+
     def debug(self):
         for i in range(self.n_layered):
             print(f"\n__LAYER__ [{i + 1}]\n")
             for j in range(len(self.layer_list[i].vector)):
-                # print(f" _nueron_{j + 1} : {self.layer_list[i].vector[j].activation} w/ bias {self.layer_list[i].vector[j].bias} w/ previous layer : {self.layer_list[i].vector[j].prev_layer}")
-                print(f" _nueron_{j + 1} : {self.layer_list[i].vector[j].activation} w/ bias {self.layer_list[i].vector[j].bias} w/ weigths : {self.layer_list[i].vector[j].weights}")
+                # print(f" _nueron_{} : {self.layer_list[i].vector[j].activation} w/ bias {self.layer_list[i].vector[j].bias} w/ previous layer : {self.layer_list[i].vector[j].prev_layer}")
+                print(f" _nueron_{j} : {self.layer_list[i].vector[j].activation} w/ bias {self.layer_list[i].vector[j].bias} w/ weigths : {self.layer_list[i].vector[j].weights}")
 
 
     def print_layers(self):
         for i in range(self.n_layered):
             print(f"\n__LAYER__ [{i + 1}]\n")
             for j in range(len(self.layer_list[i].vector)):
-                print(f" _nueron_{j + 1} : {self.layer_list[i].vector[j].activation} w bias {self.layer_list[i].vector[j].bias}")
+                print(f" _nueron_{j} : {self.layer_list[i].vector[j].activation} w bias {self.layer_list[i].vector[j].bias}")
 
     def frame_update(self):
         self.input_layer = self.layer_list[0]
         self.output_layer = self.layer_list[-1]
+    
+    def prediction_last_layer(self):
+        ls = []
+        for i in range(len(self.layer_list[-1].vector)):
+            ls.append(self.layer_list[-1].vector[i].activation)
+        return max(ls), ls.index(max(ls))
+
+
 
 
 
@@ -173,7 +188,7 @@ def main():
     # First set size of Input and Output Layer
     network.set_input_layer_size(784)
     network.set_output_layer_size(10)
-    
+
     # Setting values of the input layer
     network.set_input_layer_values(raw_image_vector)
 
@@ -190,8 +205,16 @@ def main():
     network.randomize_weights()
     network.randomize_bias()
 
+
+    # Set all activations dependant on the weights and biases
+    network.set_all_activation()
+
     # debugging
     network.debug()
+
+    # the end prediction
+    prediction_weight, number_predicted = network.prediction_last_layer()
+    print(f"predicted: {number_predicted} w/ activation {prediction_weight}")
 
 
 
@@ -200,9 +223,11 @@ def main():
 if __name__ == "__main__":
     main()
 
-# Find a way to save kernals(weights and biases for each neuron ) and then fetch them again 
+
+# Set activation funciton time yay mommy gang
+
+# Find a way to save kernals(weights and biases for each neuron ) and then fetch them again save them as a json
 # Learn MatPlotLib to bueatifully display how akira thinks
-# Randomly Generate weights and biases
 # Cost Function (Study Cost Function) Since this takes in al weights
 # WE LOCAL MINIMUM to reduce cost function, local minimum functions, what happens to the activations, overshooting
 # negative gradient of the cost function 
@@ -212,8 +237,6 @@ if __name__ == "__main__":
 
 # the activations are continous since the cost functions needs to be continuous to be able to find local mins
 # Gradient Descent
-
-
 
 # Lets write a network with random weights and biases
 
