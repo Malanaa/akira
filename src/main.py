@@ -3,15 +3,9 @@ import math
 import random
 import matplotlib.pyplot as plt
 import pandas as pd
+import datetime
+import json
 
-
-
-
-def sigmoid_squish(num) -> float:
-    '''
-    Sigmoid
-    '''
-    return (1 / (1 + math.exp(num)))
 
 
 class Layer:
@@ -25,6 +19,13 @@ class Layer:
     """
     def __init__(self, n = 1):
         self.vector = np.array([Nueron() for _ in range(n)])
+
+
+def sigmoid_squish(num) -> float:
+    '''
+    Sigmoid
+    '''
+    return (1 / (1 + math.exp(num)))
 
 
 class Nueron:
@@ -69,6 +70,11 @@ class Nueron:
             for i in range(len(self.prev_layer.vector)):
                 pre_bias = self.prev_layer.vector[i].activation * self.weights[i]
             self.activation = sigmoid_squish(pre_bias + self.bias)
+
+    def return_kernel(self):
+        n = int(math.sqrt(len(self.weights)))
+        ker = np.array(self.weights)
+        return ker.reshape((n,n))
 
 
 
@@ -152,14 +158,50 @@ class Network():
         for i in range(len(self.layer_list[-1].vector)):
             ls.append(self.layer_list[-1].vector[i].activation)
         return max(ls), ls.index(max(ls))
+    
+
+    def return_all_kernals(self):
+        kernals = {}
+        # excluding the input layer
+        for i in range(1, len(self.layer_list)):
+            for j in range(len(self.layer_list[i].vector)):
+                kernals[f' kernal __layer__{i} __nueron__{j}'] = self.layer_list[i].vector[j].return_kernel()
+        return kernals
 
 
+class NetworkWrite:
 
+    def __init__(self, network : Network):
+        '''
+        Network must already have all weights and biases set.
+        '''
+        self.network = network
+        self.data = {}
+        self.metadata = {}
+    
+    def fill_data(self, name : str):
+            self.metadata = {
+                "network-name" : name, 
+                "network-birth" : datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+                "network-input-layer-size" : len(self.network.layer_list[0].vector),
+                "network-output-layer-size" :len(self.network.layer_list[-1].vector),
+                "network-hidden-layer-size" : len(self.network.layer_list[1].vector),
+                "network-total-parameters" : 0 # I'll calculate this soon
+            }
+        
+            # excluding the input layer
+            for i in range(1, len(self.network.layer_list)):
+                for j in range(len(self.network.layer_list[i].vector)):
+                    weights = {}
+                    for k in range(len(self.network.layer_list[i].vector[j].weights)):
+                        weights[k] = self.network.layer_list[i].vector[j].weights[k]
+                    self.data[f"l{i}n{j}"] = [weights,self.network.layer_list[i].vector[j].bias]
 
-
-class Akira():
-    pass
-
+    
+    def record_data(self, filename, model_name=f"network@time{datetime.datetime.now().strftime("%H:%M:%S")}"):
+        self.fill_data(model_name)
+        with open(filename, "w") as outfile:
+            json.dump({"metadata": self.metadata, "data": self.data}, outfile, indent=4)
 
 def main():
 
@@ -209,22 +251,26 @@ def main():
     # Set all activations dependant on the weights and biases
     network.set_all_activation()
 
-    # debugging
+    # # debugging
     network.debug()
 
-    # the end prediction
+    # # the end prediction
     prediction_weight, number_predicted = network.prediction_last_layer()
     print(f"predicted: {number_predicted} w/ activation {prediction_weight}")
 
 
+    # plot these out in matplot lib alr
+    all_kernals = network.return_all_kernals()
+
+    write_network = NetworkWrite(network=network)
+    write_network.record_data("network.json")
 
 
 
 if __name__ == "__main__":
     main()
 
-
-# Set activation funciton time yay mommy gang
+# save and load weights and biases
 
 # Find a way to save kernals(weights and biases for each neuron ) and then fetch them again save them as a json
 # Learn MatPlotLib to bueatifully display how akira thinks
