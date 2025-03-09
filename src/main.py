@@ -17,6 +17,13 @@ class Layer:
         self.vector = np.array([Nueron() for _ in range(n)])
 
 
+def cost_one(prediction, expected):
+    cost = 0
+    for i in range(len(expected)):
+        # cost += (prediction[i].activation - expected[i])**2
+        cost += (prediction[i].activation - float(expected[i]))**2
+    return cost
+
 def sigmoid_squish(num) -> float:
     '''
     sigmoid squisification : activation 1/(1+e^x))
@@ -150,6 +157,20 @@ class Network():
             for j in range(len(self.layer_list[i].vector)):
                 kernals[f' kernal __layer__{i} __nueron__{j}'] = self.layer_list[i].vector[j].return_kernel()
         return kernals
+    
+    def reset_activations(self):
+        for i in range(len(self.layer_list)):
+            for j in range(len(self.layer_list[i].vector)):
+                self.layer_list[i].vector[j].activation = 0 
+
+    def fire_given_label(self,given_input_list,label):
+        compare_vector = [0 for i in range(len(self.layer_list[-1].vector))]
+        compare_vector[label] = 1
+        self.set_input_layer_values(given_input_list)
+        self.set_all_activation()
+        cost = cost_one(list(self.layer_list[-1].vector), compare_vector)
+        return cost
+    
 
 
 class NetworkWrite:
@@ -218,8 +239,18 @@ class NetworkRead:
         return self.network
 
 
-        
-    
+
+
+def create_new_random_784_16_16_10_network():
+    network = Network(4)
+    network.set_input_layer_size(784)
+    network.set_output_layer_size(10)
+    network.set_hidden_layer_size(16)
+    network.randomize_bias()
+    network.randomize_weights()
+    write_network = NetworkWrite(network)
+    write_network.record_data('network_mnist.json')
+
     
 def main():
 
@@ -231,14 +262,14 @@ def main():
     data = df.drop('label', axis=1) # training data
 
 
-    '''
-    Data for image i raw data fetch with 
-    '''
-    i = 1
-    label_i = label.iloc[i]
-    data_i = data.iloc[i]
-    image_i = data.iloc[i].values.reshape(28,28)
-    raw_image_vector = data.iloc[i].values # Flattened 1D vector for IMG
+    # '''
+    # Data for image i raw data fetch with 
+    # '''
+    # i = 1
+    # label_i = label.iloc[i]
+    # data_i = data.iloc[i]
+    # image_i = data.iloc[i].values.reshape(28,28)
+    # raw_image_vector = data.iloc[i].values # Flattened 1D vector for IMG
 
 
     '''
@@ -255,8 +286,13 @@ def main():
     # network = Network(4)
     # network.set_input_layer_size(784)
     # network.set_output_layer_size(10)
-    # network.set_input_layer_values(raw_image_vector)
     # network.set_hidden_layer_size(16)
+    
+    '''
+    setting input values here manually
+    '''
+    # network.set_input_layer_values(raw_image_vector)
+
     # network.randomize_weights()
     # network.randomize_bias()
     '''
@@ -289,10 +325,32 @@ def main():
 
 
     '''
-    Current Test
+    Data for image i raw data fetch with 
+    '''
+    i = 2
+    label_i = label.iloc[i]
+    data_i = data.iloc[i]
+    image_i = data.iloc[i].values.reshape(28,28)
+    raw_image_vector = data.iloc[i].values # Flattened 1D vector for IMG
+
+    '''
+    Random Network generator
+    '''
+    # create_new_random_784_16_16_10_network()
+
+    '''
+    test
     '''
     load_network = NetworkRead()
-    load_network.assign_network('network.json')
+    new_network = load_network.get_network_from('network_mnist.json')
+    # new_network.set_input_layer_values(raw_image_vector)
+    # new_network.set_all_activation()
+    # new_network.debug()
+    cost = new_network.fire_given_label(given_input_list=raw_image_vector, label=label_i)
+    new_network.debug()
+    prediction_weight, number_predicted = new_network.prediction_last_layer()
+    print(f"original_image = {label_i}. predicted: {number_predicted} w/ activation {prediction_weight} \ncost : {cost}")
+
 
 
 
