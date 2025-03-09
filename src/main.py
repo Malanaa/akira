@@ -10,12 +10,8 @@ import json
 
 class Layer:
     """
-    Layer
+    Layer(n) : size n layer.
 
-    Members:
-
-    Methods:
-    
     """
     def __init__(self, n = 1):
         self.vector = np.array([Nueron() for _ in range(n)])
@@ -23,20 +19,13 @@ class Layer:
 
 def sigmoid_squish(num) -> float:
     '''
-    Sigmoid
+    sigmoid squisification : activation 1/(1+e^x))
+
     '''
     return (1 / (1 + math.exp(num)))
 
 
 class Nueron:
-    """
-    Nueron
-
-    Members:
-
-    Methods:
-
-    """
 
     def __init__(self):
         self.prev_layer = None
@@ -80,14 +69,7 @@ class Nueron:
 
 
 class Network():
-    """
-    Network
 
-    Members:
-
-    Methods:
-    
-    """
     def __init__(self, n_layered : int):
         self.n_layered = n_layered
         self.layer_list = [Layer() for _ in range(n_layered)]
@@ -212,6 +194,7 @@ class NetworkWrite:
 
 
 class NetworkRead:
+
     def __init__(self):
         self.network = None
         self.metadata = None
@@ -235,81 +218,68 @@ class NetworkRead:
         return self.network
 
 
-        # return self.network
         
     
     
 def main():
 
-    # Loading in the dala
+    '''
+    Loading the data with pandas
+    '''
     df = pd.read_csv('dataset_digits/train.csv')
-    # labels
-    label = df['label']
-    data = df.drop('label', axis=1)
+    label = df['label'] # Labels in {0-9}
+    data = df.drop('label', axis=1) # training data
 
-    # img i for example
+
+    '''
+    Data for image i raw data fetch with 
+    '''
     i = 1
     label_i = label.iloc[i]
     data_i = data.iloc[i]
     image_i = data.iloc[i].values.reshape(28,28)
+    raw_image_vector = data.iloc[i].values # Flattened 1D vector for IMG
 
-    # raw 1D vector that i need
-    raw_image_vector = data.iloc[i].values
 
+    '''
+    Show the image using matplotlib
+    '''
     # plt.imshow(image_i, cmap='gray')
     # print(label_i)
     # plt.show()
 
-    # set n-layered nueral network
-    # network = Network(4)
 
-    # # # First set size of Input and Output Layer
+    '''
+    Manually Initialzing a 4-layered nueral network with random weight's and biases.
+    '''
+    # network = Network(4)
     # network.set_input_layer_size(784)
     # network.set_output_layer_size(10)
-
-    # # # Setting values of the input layer
     # network.set_input_layer_values(raw_image_vector)
-
-
-    '''
-    The order here matters, you must initialze the first and last layer first. this is because of how the functions are called 
-    . set_hidden_layer_size() sizes up the weights list for all the hidden layers and the last layer. 
-    ( I could make it so that the last layer is done after but there is no point, if a usecase shows up ill change it)
-    '''
-    # then set size of hidden layers
     # network.set_hidden_layer_size(16)
-
-    # # # Randomizing just to test
     # network.randomize_weights()
     # network.randomize_bias()
-
-
-    # Set all activations dependant on the weights and biases
+    '''
+    calculating the activations
+    '''
     # network.set_all_activation()
-
-    # # debugging
+    '''
+    debug
+    '''
     # network.debug()
-
-    # # the end prediction
+    '''
+    getting the prediction and kernals
+    '''
     # prediction_weight, number_predicted = network.prediction_last_layer()
     # print(f"predicted: {number_predicted} w/ activation {prediction_weight}")
-
-
-    # # plot these out in matplot lib alr
     # all_kernals = network.return_all_kernals()
 
+
+    '''Writing Existing Network to a Json file'''
     # write_network = NetworkWrite(network=network)
     # write_network.record_data("network.json")
 
-    # network_parser = NetworkRead()
-    # new_network = network_parser.get_network_from('network.json')
-    # new_network.set_all_activation()
-    # new_network.set_input_layer_values(raw_image_vector)
-    # new_network.debug()
-
-    '''
-    Now we can parse in a network from a json file :D
-    '''
+    '''Reading Network from Existing Json file'''
     # network_parser = NetworkRead()
     # new_network = network_parser.get_network_from('network.json')
     # new_network.set_all_activation()
@@ -318,6 +288,9 @@ def main():
 
 
 
+    '''
+    Current Test
+    '''
     load_network = NetworkRead()
     load_network.assign_network('network.json')
 
@@ -326,19 +299,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# save and load weights and biases
-
-# Find a way to save kernals(weights and biases for each neuron ) and then fetch them again save them as a json
-# Learn MatPlotLib to bueatifully display how akira thinks
-# Cost Function (Study Cost Function) Since this takes in al weights
-# WE LOCAL MINIMUM to reduce cost function, local minimum functions, what happens to the activations, overshooting
-# negative gradient of the cost function 
-
-# Understand the cost function more
-# Back Propogation
-
-# the activations are continous since the cost functions needs to be continuous to be able to find local mins
-# Gradient Descent
-
-# Lets write a network with random weights and biases
 
