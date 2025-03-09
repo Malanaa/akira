@@ -44,13 +44,14 @@ class Nueron:
         self.weights = []
         self.bias = 0.0 
 
-    def set_weights(self):
+    def set_weights(self, listweights):
         if self.prev_layer:
-            pass
+            self.weights = listweights
 
-    def set_bias(self):
+    def set_bias(self, bias):
         if self.prev_layer:
-            pass
+            self.bias = bias
+            
 
     def randomize_weights(self):
         if self.prev_layer:
@@ -182,6 +183,7 @@ class NetworkWrite:
     def fill_data(self, name : str):
             self.metadata = {
                 "network-name" : name, 
+                'network-num-layers': len(self.network.layer_list),
                 "network-birth" : datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
                 "network-input-layer-size" : len(self.network.layer_list[0].vector),
                 "network-output-layer-size" :len(self.network.layer_list[-1].vector),
@@ -192,9 +194,8 @@ class NetworkWrite:
             # excluding the input layer
             for i in range(1, len(self.network.layer_list)):
                 for j in range(len(self.network.layer_list[i].vector)):
-                    weights = {}
-                    for k in range(len(self.network.layer_list[i].vector[j].weights)):
-                        weights[k] = self.network.layer_list[i].vector[j].weights[k]
+                    weights = []
+                    weights = self.network.layer_list[i].vector[j].weights
                     self.data[f"l{i}n{j}"] = [weights,self.network.layer_list[i].vector[j].bias]
 
     
@@ -203,6 +204,35 @@ class NetworkWrite:
         with open(filename, "w") as outfile:
             json.dump({"metadata": self.metadata, "data": self.data}, outfile, indent=4)
 
+
+class NetworkRead:
+    def __init__(self):
+        self.network = None
+        self.metadata = None
+        self.personality = None
+
+    def get_network_from(self,filename): 
+        with open(filename, "r") as file:
+            data =  json.load(file)
+        
+        self.metadata = data["metadata"] #  a dictionary
+        self.personality = data['data'] #  a dictionary
+        self.network = Network(self.metadata['network-num-layers'])
+        self.network.set_input_layer_size(self.metadata['network-input-layer-size'])
+        self.network.set_output_layer_size(self.metadata['network-output-layer-size'])
+        self.network.set_hidden_layer_size(self.metadata['network-hidden-layer-size'])
+        for i in range(1,len(self.network.layer_list)):
+            for j in range(len(self.network.layer_list[i].vector)):
+                self.network.layer_list[i].vector[j].weights = self.personality[f"l{i}n{j}"][0]
+                self.network.layer_list[i].vector[j].bias = self.personality[f"l{i}n{j}"][1]
+
+        return self.network
+
+
+        # return self.network
+        
+    
+    
 def main():
 
     # Loading in the dala
@@ -225,14 +255,14 @@ def main():
     # plt.show()
 
     # set n-layered nueral network
-    network = Network(4)
+    # network = Network(4)
 
-    # First set size of Input and Output Layer
-    network.set_input_layer_size(784)
-    network.set_output_layer_size(10)
+    # # First set size of Input and Output Layer
+    # network.set_input_layer_size(784)
+    # network.set_output_layer_size(10)
 
-    # Setting values of the input layer
-    network.set_input_layer_values(raw_image_vector)
+    # # Setting values of the input layer
+    # network.set_input_layer_values(raw_image_vector)
 
 
     '''
@@ -241,29 +271,49 @@ def main():
     ( I could make it so that the last layer is done after but there is no point, if a usecase shows up ill change it)
     '''
     # then set size of hidden layers
-    network.set_hidden_layer_size(16)
+    # network.set_hidden_layer_size(16)
 
-    # Randomizing just to test
-    network.randomize_weights()
-    network.randomize_bias()
+    # # Randomizing just to test
+    # network.randomize_weights()
+    # network.randomize_bias()
 
 
     # Set all activations dependant on the weights and biases
-    network.set_all_activation()
+    # network.set_all_activation()
 
     # # debugging
-    network.debug()
+    # network.debug()
 
     # # the end prediction
-    prediction_weight, number_predicted = network.prediction_last_layer()
-    print(f"predicted: {number_predicted} w/ activation {prediction_weight}")
+    # prediction_weight, number_predicted = network.prediction_last_layer()
+    # print(f"predicted: {number_predicted} w/ activation {prediction_weight}")
 
 
-    # plot these out in matplot lib alr
-    all_kernals = network.return_all_kernals()
+    # # plot these out in matplot lib alr
+    # all_kernals = network.return_all_kernals()
 
-    write_network = NetworkWrite(network=network)
-    write_network.record_data("network.json")
+    # write_network = NetworkWrite(network=network)
+    # write_network.record_data("network.json")
+
+    # network_parser = NetworkRead()
+    # new_network = network_parser.get_network_from('network.json')
+    # new_network.set_all_activation()
+    # new_network.set_input_layer_values(raw_image_vector)
+    # new_network.debug()
+
+    '''
+    Now we can parse in a network from a json file :D
+    '''
+    network_parser = NetworkRead()
+    new_network = network_parser.get_network_from('network.json')
+    new_network.set_all_activation()
+    new_network.set_input_layer_values(raw_image_vector)
+    new_network.debug()
+
+
+
+    # load_network = NetworkRead()
+    # load_network.assign_network('network.json')
 
 
 
