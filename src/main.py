@@ -179,8 +179,14 @@ class NetworkWrite:
         self.network = network
         self.data = {}
         self.metadata = {}
+        self.total_parameters = 0
     
     def fill_data(self, name : str):
+
+            for i in range(1, len(self.network.layer_list)):
+                for j in range(len(self.network.layer_list[i].vector)):
+                    self.total_parameters += (len(self.network.layer_list[i].vector[j].weights) + 1)
+
             self.metadata = {
                 "network-name" : name, 
                 'network-num-layers': len(self.network.layer_list),
@@ -188,7 +194,7 @@ class NetworkWrite:
                 "network-input-layer-size" : len(self.network.layer_list[0].vector),
                 "network-output-layer-size" :len(self.network.layer_list[-1].vector),
                 "network-hidden-layer-size" : len(self.network.layer_list[1].vector),
-                "network-total-parameters" : 0 # I'll calculate this soon
+                "network-total-parameters" : self.total_parameters 
             }
         
             # excluding the input layer
@@ -257,11 +263,11 @@ def main():
     # set n-layered nueral network
     # network = Network(4)
 
-    # # First set size of Input and Output Layer
+    # # # First set size of Input and Output Layer
     # network.set_input_layer_size(784)
     # network.set_output_layer_size(10)
 
-    # # Setting values of the input layer
+    # # # Setting values of the input layer
     # network.set_input_layer_values(raw_image_vector)
 
 
@@ -273,7 +279,7 @@ def main():
     # then set size of hidden layers
     # network.set_hidden_layer_size(16)
 
-    # # Randomizing just to test
+    # # # Randomizing just to test
     # network.randomize_weights()
     # network.randomize_bias()
 
@@ -304,16 +310,16 @@ def main():
     '''
     Now we can parse in a network from a json file :D
     '''
-    network_parser = NetworkRead()
-    new_network = network_parser.get_network_from('network.json')
-    new_network.set_all_activation()
-    new_network.set_input_layer_values(raw_image_vector)
-    new_network.debug()
+    # network_parser = NetworkRead()
+    # new_network = network_parser.get_network_from('network.json')
+    # new_network.set_all_activation()
+    # new_network.set_input_layer_values(raw_image_vector)
+    # new_network.debug()
 
 
 
-    # load_network = NetworkRead()
-    # load_network.assign_network('network.json')
+    load_network = NetworkRead()
+    load_network.assign_network('network.json')
 
 
 
