@@ -256,7 +256,7 @@ def create_new_random_784_16_16_10_network():
     network.randomize_bias()
     network.randomize_weights()
     write_network = NetworkWrite(network)
-    write_network.record_data('network_mnist.json')
+    write_network.record_data('random_network.json')
 
     
 def average_cost_on_N_dataset(network : Network,data,label):
@@ -286,6 +286,21 @@ def create_average_cost_function(network : Network, data, label):
     #     print(f" adding_tcf __ {(i/len(data))*100}% __ : {label.iloc[i]} : predicted : {prediction} - certainty : {activation} - cost : {cost}")
     # print(f"lenght of lp cost function is {len(lp_cost_func)}")
     # return lp_cost_func
+
+def find_average_acc(network : Network,data,label):
+    '''
+    '''
+    accurate = 0
+    for i in range(len(data)):
+        cost = network.fire_given_label(data.iloc[i].values, label.iloc[i])
+        activation, prediction = network.prediction_last_layer()
+        correct = False
+        if(prediction == label.iloc[i]):
+            correct = True
+            accurate+=1
+        print(f"__ {(i/len(data))*100}% __ : {label.iloc[i]} : predicted : {prediction} - certainty : {activation} - cost : {cost}: pw___{correct}")
+        # network.debug()
+    return (accurate / len(data))*100
 
 def main():
 
@@ -371,7 +386,7 @@ def main():
     '''
     Random Network generator
     '''
-    # create_new_random_784_16_16_10_network()
+    create_new_random_784_16_16_10_network()
 
 
 
@@ -379,12 +394,18 @@ def main():
     Load data and get average cost over n images.
     '''
     load_network = NetworkRead()
-    new_network = load_network.get_network_from('network_mnist.json')
+    new_network = load_network.get_network_from('random_network.json')
     '''
     just training and getting the average cost
     '''
     average_cost = average_cost_on_N_dataset(network=new_network, data=data[:100], label=label[:100])
     print(f"THE AVERAGE COST OF THE MODEL WAS: {average_cost}")
+
+    '''
+    Average Accuracy
+    '''
+    # average_acc = find_average_acc(network=new_network, data=data[:1000], label=label[:1000])
+    # print(f"your model had accuracy {average_acc}%")
 
     # cost = new_network.fire_given_label(given_input_list=raw_image_vector, label=label_i)
     # new_network.debug()
