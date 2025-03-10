@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
 import json
-
-
+# import scipy.special as scp
 
 class Layer:
     """
@@ -23,6 +22,7 @@ def cost_one(prediction, expected):
         # cost += (prediction[i].activation - expected[i])**2
         cost += (prediction[i].activation - float(expected[i]))**2
     return cost
+
 
 def sigmoid(num) -> float:
     '''
@@ -73,7 +73,7 @@ class Nueron:
         if self.prev_layer:
             for i in range(len(self.prev_layer.vector)):
                 pre_bias += self.prev_layer.vector[i].activation * self.weights[i]
-            self.activation = relu(pre_bias + self.bias)
+            self.activation = sigmoid(pre_bias + self.bias)
 
     def return_kernel(self):
         n = int(math.sqrt(len(self.weights)))
@@ -271,8 +271,21 @@ def average_cost_on_N_dataset(network : Network,data,label):
         # network.debug()
     return avg_cost / len(data)
 
-def create_cost_function():
+def create_average_cost_function(network : Network, data, label):
     pass
+    # lp_cost_func = []
+    # for i in range(len(data)):
+    #     cost = network.fire_given_label(data.iloc[i].values, label.iloc[i])
+    #     activation_for_weights = []
+    #     for j in range(len(network.layer_list)):
+    #         activation_for_weights.append(layer.activation for layer in network.layer_list[j].vector)
+    #     lp_cost_func.append(activation_for_weights)
+    #     activation_for_weights = []
+    #     lp_cost_func.append([1])
+    #     activation, prediction = network.prediction_last_layer()
+    #     print(f" adding_tcf __ {(i/len(data))*100}% __ : {label.iloc[i]} : predicted : {prediction} - certainty : {activation} - cost : {cost}")
+    # print(f"lenght of lp cost function is {len(lp_cost_func)}")
+    # return lp_cost_func
 
 def main():
 
@@ -358,11 +371,8 @@ def main():
     '''
     Random Network generator
     '''
-    create_new_random_784_16_16_10_network()
+    # create_new_random_784_16_16_10_network()
 
-    '''
-    test
-    '''
 
 
     '''
@@ -370,7 +380,10 @@ def main():
     '''
     load_network = NetworkRead()
     new_network = load_network.get_network_from('network_mnist.json')
-    average_cost = average_cost_on_N_dataset(network=new_network, data=data, label=label)
+    '''
+    just training and getting the average cost
+    '''
+    average_cost = average_cost_on_N_dataset(network=new_network, data=data[:100], label=label[:100])
     print(f"THE AVERAGE COST OF THE MODEL WAS: {average_cost}")
 
     # cost = new_network.fire_given_label(given_input_list=raw_image_vector, label=label_i)
