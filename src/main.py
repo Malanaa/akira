@@ -24,14 +24,20 @@ def cost_one(prediction, expected):
         cost += (prediction[i].activation - float(expected[i]))**2
     return cost
 
-def sigmoid_squish(num) -> float:
+def sigmoid(num) -> float:
     '''
-    sigmoid squisification : activation 1/(1+e^x))
+    sigmoid squisification
 
     '''
-    return (1 / (1 + math.exp(num)))
+    if num < 0:
+        return 1 - 1 / (1 + math.exp(num))
+    return 1 / (1 + math.exp(-num))
 
-
+def relu(num) -> float:
+    '''
+    relu
+    '''
+    return max(0,num)
 class Nueron:
 
     def __init__(self):
@@ -63,10 +69,11 @@ class Nueron:
 
     # Only for hideen layers
     def set_activation(self):
+        pre_bias = 0
         if self.prev_layer:
             for i in range(len(self.prev_layer.vector)):
-                pre_bias = self.prev_layer.vector[i].activation * self.weights[i]
-            self.activation = sigmoid_squish(pre_bias + self.bias)
+                pre_bias += self.prev_layer.vector[i].activation * self.weights[i]
+            self.activation = relu(pre_bias + self.bias)
 
     def return_kernel(self):
         n = int(math.sqrt(len(self.weights)))
@@ -252,6 +259,21 @@ def create_new_random_784_16_16_10_network():
     write_network.record_data('network_mnist.json')
 
     
+def average_cost_on_N_dataset(network : Network,data,label):
+    '''
+    '''
+    avg_cost = 0
+    for i in range(len(data)):
+        cost = network.fire_given_label(data.iloc[i].values, label.iloc[i])
+        avg_cost += cost
+        activation, prediction = network.prediction_last_layer()
+        print(f"__ {(i/len(data))*100}% __ : {label.iloc[i]} : predicted : {prediction} - certainty : {activation} - cost : {cost}")
+        # network.debug()
+    return avg_cost / len(data)
+
+def create_cost_function():
+    pass
+
 def main():
 
     '''
@@ -327,7 +349,7 @@ def main():
     '''
     Data for image i raw data fetch with 
     '''
-    i = 2
+    i = 1
     label_i = label.iloc[i]
     data_i = data.iloc[i]
     image_i = data.iloc[i].values.reshape(28,28)
@@ -336,22 +358,28 @@ def main():
     '''
     Random Network generator
     '''
-    # create_new_random_784_16_16_10_network()
+    create_new_random_784_16_16_10_network()
 
     '''
     test
     '''
+
+
+    '''
+    Load data and get average cost over n images.
+    '''
     load_network = NetworkRead()
     new_network = load_network.get_network_from('network_mnist.json')
-    # new_network.set_input_layer_values(raw_image_vector)
-    # new_network.set_all_activation()
+    average_cost = average_cost_on_N_dataset(network=new_network, data=data, label=label)
+    print(f"THE AVERAGE COST OF THE MODEL WAS: {average_cost}")
+
+    # cost = new_network.fire_given_label(given_input_list=raw_image_vector, label=label_i)
     # new_network.debug()
-    cost = new_network.fire_given_label(given_input_list=raw_image_vector, label=label_i)
-    new_network.debug()
-    prediction_weight, number_predicted = new_network.prediction_last_layer()
-    print(f"original_image = {label_i}. predicted: {number_predicted} w/ activation {prediction_weight} \ncost : {cost}")
+    # prediction_weight, number_predicted = new_network.prediction_last_layer()
+    # print(f"original_image = {label_i}. predicted: {number_predicted} w/ activation {prediction_weight} \ncost : {cost}")
 
 
+    # export a average cost function and then minimize it
 
 
 if __name__ == "__main__":
